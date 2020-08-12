@@ -1,0 +1,7 @@
+---
+- name: Nginx Deployment
+  hosts: nginx
+  strategy: debug
+  gather_facts: yes
+  roles:
+    - ../roles/nginx
