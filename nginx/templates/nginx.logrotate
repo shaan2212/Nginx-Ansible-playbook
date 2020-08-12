@@ -1,0 +1,19 @@
+/data/nginx/logs/*.log {
+        su nginx nginx
+        missingok
+        rotate 14
+        dateext
+        dateformat -%d%m%Y
+        compress
+        delaycompress
+        notifempty
+        create 755 nginx nginx
+        sharedscripts
+        postrotate
+        /usr/bin/setfacl -m u:e5605266:rwx /data/nginx/logs/access.log
+        /usr/bin/setfacl -m u:e5605266:rwx /data/nginx/logs/error.log
+                if [ -f /var/run/nginx.pid ]; then
+                        kill -USR1 `cat /var/run/nginx.pid`
+                fi
+        endscript
+}

@@ -1,0 +1,58 @@
+---
+# tasks file for roles/nginx
+- name: Gather the rpm package facts
+  package_facts:
+    manager: auto
+
+- name: verify and End play if nginx already installed.
+  debug:
+    msg: "checking if nginx is already installed"
+- meta: end_host
+  when: "'nginx' in ansible_facts.packages"
+
+- name: check if nginx pkg exists in Destination
+  stat:
+    path: /tmp/{{ nginx_pkg }}
+  register: pkginfo
+ 
+- name: Copying Nginx RPM
+  copy:
+    src: files/{{ ngnix_pkg }}
+    dest: /tmp/
+    owner: root
+    group: root
+    mode: '0755'
+  when: pkginfo.stat.exists == False
+
+- name: Install Nginx
+  yum:
+    name:
+      - /tmp/nginx-1.8.1-1.el7.ngx.x86_64.rpm
+    state: present  
+
+- name: Ensure Nginx service is installed and restarted
+  service:
+     name: nginx
+     state: restarted
+     enabled: yes
+
+- name: Enabling LogRotation for Nginx
+  copy:
+    src: templates/nginx.logrotate
+    dest: /etc/logrotate.d/nginx
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Creating Cron Job for logrotation
+  cron: 
+    name: "Nginx Cron Job"
+    minute: 0
+    hour: 0
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "/sbin/logrotate -f /etc/logrotate.d/nginx" 
+
+- name: cleaning up build files
+  command: rm -rf /tmp/{{ ngnix_pkg }}

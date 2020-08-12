@@ -1,0 +1,4 @@
+---
+# defaults file for roles/nginx
+nginx_pkg: "nginx-1.8.1-1.el7.ngx.x86_64.rpm"
+nginx_version: "1.8.1"
